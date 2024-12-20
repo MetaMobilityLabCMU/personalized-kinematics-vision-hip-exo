@@ -1,0 +1,178 @@
+---
+layout: ../layouts/Layout.astro
+title: Personalization of Wearable Sensor-Based Joint Kinematic Estimation Using Computer Vision for Hip Exoskeleton Applications
+description: Simple project page template for your research paper, built with Astro and Tailwind CSS
+favicon: favicon.svg
+thumbnail: screenshot.png
+---
+
+import Layout from "../layouts/Layout.astro";
+
+import Header from "../components/Header.astro";
+import Video from "../components/Video.astro";
+import HighlightedSection from "../components/HighlightedSection.astro";
+import SmallCaps from "../components/SmallCaps.astro";
+import Figure from "../components/Figure.astro";
+import Image from "../components/Image.astro";
+import TwoColumns from "../components/TwoColumns.astro";
+import YouTubeVideo from "../components/YouTubeVideo.astro";
+import LaTeX from "../components/LaTeX.astro";
+
+import sensing_suit from "../assets/Wearable_Sensing_Suit.png";
+import vision_model from "../assets/vision_model.mp4";
+import sk_video from "../assets/SK_1d0_video.mp4";
+import vision_model_scheme from "../assets/vision_model_scheme.png";
+import tcn from "../assets/TCN.png";
+import results from "../assets/Results.png";
+import results_joint from "../assets/Results_joint_level.png";
+
+import CodeBlock from "../components/CodeBlock.astro";
+import Table from "../components/Table.astro";
+export const components = {pre: CodeBlock, table: Table}
+
+<Header
+  title={"Personalization of Wearable Sensor-Based Joint Kinematic Estimation Using Computer Vision for Hip Exoskeleton Applications"}
+  authors={[
+    {
+      name: "Changseob Song",
+      institution: "Carnegie Mellon University",
+      notes: ["†", "*"],
+    },
+    {
+      name: "Bogdan Ivanyuk-Skulskyi",
+      institution: "University of Lille; Cyclope.ai",
+      notes: ["†"],
+    },
+    {
+      name: "Adrian Krieger",
+      institution: "Carnegie Mellon University",
+    },
+    {
+      name: "Kaitao Luo",
+      institution: "Carnegie Mellon University",
+    },
+    {
+      name: "Inseung Kang",
+      institution: "Carnegie Mellon University",
+    },
+  ]}
+  conference=""
+  notes={[
+    {
+      symbol: "*",
+      text: "Corresponding Author",
+    },
+    {
+      symbol: "†",
+      text: "Equal Contribution",
+    },
+  ]}
+  links={[
+    {
+      name: "Paper",
+      url: "",
+      icon: "fa-solid:file-pdf",
+    },
+    {
+      name: "Code",
+      url: "https://github.com/RomanHauksson/academic-project-astro-template",
+      icon: "mdi:github",
+    },
+    {
+      name: "arXiv",
+      url: "https://arxiv.org/abs/2411.15366",
+      icon: "academicons:arxiv",
+    },
+  ]}
+  />
+
+<Figure maxWidth="max-w-3xl">
+  <YouTubeVideo videoId="QwGfz0owd5U" />
+</Figure>
+
+
+
+<HighlightedSection>
+## Abstract
+Accurate lower-limb joint kinematic estimation is critical for applications such as patient monitoring, rehabilitation, and exoskeleton control. While previous studies have employed wearable sensor-based deep learning (DL) models for estimating joint kinematics, these methods often require extensive new datasets to adapt to unseen gait patterns. Meanwhile, researchers in computer vision have advanced human pose estimation models, which are easy to deploy and capable of real-time inference. However, such models are infeasible in scenarios where cameras cannot be used. To address these limitations, we propose a computer vision-based DL adaptation framework for real-time joint kinematic estimation. This framework requires only a small dataset (i.e., 1–2 gait cycles) and does not depend on professional motion capture setups. Using transfer learning, we adapted our temporal convolutional network (TCN) to stiff knee gait data, allowing the model to further reduce root mean square error by 9.7% and 19.9% compared to a TCN trained on only able-bodied and stiff knee dataset, respectively. Our framework demonstrated a potential for smartphone camera-trained DL model to estimate real-time joint kinematics across novel users in clinical populations with applications in wearable robots.
+</HighlightedSection>
+
+[I guess we can remove it] In this work, we introduce a computer vision-based model adaptation pipeline for lower limb kinematic estimation. Our hypothesis is that vision-extracted kinematics can help personalize the estimation pipeline. We achieve this through transfer learning, where a pre-trained model on general gait patterns is adapted to a new, unseen gait pattern using as little as one to two gait cycles of new data.
+
+## Wearable sensing suit
+We prototyped a wearable sensing suit that includes a portable computer capable of running inference in real-time. Three IMUs are attached to the pelvis and thighs. To compare our estimated gait data with ground-truth data, we synchronized the wearable system with a data-acquisition box.
+
+<Figure caption="Wearable sensing suit for joint angle estimation. (a) Components of the sensing suit hardware. (b) Data flow within the sensing suit for sensor data logging and real-time inference of joint kinematics.">
+    <Image source={sensing_suit} altText="sensing suit"/>
+</Figure>
+
+## Vision Model
+ We utilized open-source computer vision models to estimate and calculate joint kinematics. First, we employed YOLO to detect the human subject and define the bounding box. Second, we extracted two-dimensional keypoints with ViTPose, a model known for high estimation accuracy and efficient computation. Then, we reconstructed three-dimensional keypoints using Video-Pose 3D. From these 3D keypoints, we calculated hip and knee angles. A sample plot on the right shows the output of our pose estimation pipeline.
+
+
+<TwoColumns>
+  <Figure slot="left" caption="Pose estimation pipeline overview: (a) Extracting 3D joint keypoints from video frames. (b) Measuring joint angles from 3D keypoints. (c) Comparison of estimated joint angles (solid lines) and ground truth (dotted lines) for a subject walking at 1.0 m/s.">
+    <Image source={vision_model_scheme} altText="vision model scheme"/>
+  </Figure>
+  <Figure slot="right" caption="Video samples processed with YOLO v8n for object detection, ViTPose-base for keypoint detection, and VideoPose3D for 3D keypoint reconstruction.">
+    <Video source={vision_model} />
+  </Figure>
+</TwoColumns>
+
+
+
+ To synchronize with ground-truth data, we used one camera from the marker-less motion capture system. We selected the right-side view camera from six available options, as it offered the lowest angle error. Among the ViTPose models, we chose *base* as it provided estimations with the lowest estimation error (see Table 1).
+
+<caption>Table 1: Joint Kinematics Estimation Errors (degrees) of ViTPose models across different camera views</caption>
+| Vision model | Model weights | Model config | Left front | Left side | Left back | Right front | Right side | Right back |
+| ---- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| ViTPose&nbsp;-&nbsp;small&nbsp; | [weights](https://download.openmmlab.com/mmpose/v1/body_2d_keypoint/topdown_heatmap/coco/td-hm_ViTPose-small_8xb64-210e_coco-256x192-62d7a712_20230314.pth) | config | 16.30 | 10.01 | 10.88 | 12.75 | 9.66 | 10.82 |
+| ViTPose&nbsp;-&nbsp;base&nbsp;  | [weights](https://download.openmmlab.com/mmpose/v1/body_2d_keypoint/topdown_heatmap/coco/td-hm_ViTPose-base_8xb64-210e_coco-256x192-216eae50_20230314.pth) | config | 16.50 | 10.03 | 10.74 | 13.04 | **<span style="background-color: #fef4c0;">9.60</span>** | 10.53 |
+| ViTPose&nbsp;-&nbsp;large&nbsp; | [weights](https://download.openmmlab.com/mmpose/v1/body_2d_keypoint/topdown_heatmap/coco/td-hm_ViTPose-large_8xb64-210e_coco-256x192-53609f55_20230314.pth) | config | 16.46 | 10.07 | 10.90 | 13.64 | 9.79 | 10.41 |
+| ViTPose&nbsp;-&nbsp;huge&nbsp;  | [weights](https://download.openmmlab.com/mmpose/v1/body_2d_keypoint/topdown_heatmap/coco/td-hm_ViTPose-huge_8xb64-210e_coco-256x192-e32adcd4_20230314.pth) | config | 16.40 | 10.89 | 10.81 | 13.89 | 9.94 | 10.50 |
+
+
+ We used computer vision model to estimate the pose of irregular gait patterns, specifically a stiff-knee (SK) gait. We simulated the SK gait by having the subject wear a knee brace on the right leg, resulting in an asymmetrical, knee-constrained gait pattern.
+
+<Figure caption="Stiff-knee gait as an irregular, unseen gait pattern different from able-bodied gait pattern.">
+    <Video source={sk_video} altText="TCN model structure"/>
+</Figure> 
+
+## Temporal Convolutional network
+We utilized a Temporal Convolutional Network (TCN) to estimate joint angles from IMU inputs. TCNs are widely used in the exoskeleton field due to their robustness with time-series data. We used a window size of 50 and built five temporal blocks within the TCN architecture.
+
+<Figure caption="Structure of the Temporal Convolutional Network (TCN) for training the kinematic estimation model.">
+    <Image source={tcn} altText="TCN model structure"/>
+</Figure>
+
+We first trained a TCN model (the AB model) on data from three able-bodied subjects walking at four different speeds. Afterwards, we adapted this model to handle irregular gait patterns, specifically a stiff-knee (SK) gait. We simulated the SK gait by having the subject wear a knee brace on the right leg, resulting in an asymmetrical, knee-constrained gait pattern.
+
+<TwoColumns>
+  <Figure slot="left" caption="Validation results for real-time kinematic estimation. (a) Treadmill speed profile. (b) RMSE across four lower-limb joints (mean ± SD, 3 SK subjects). Trial names indicate TCN models (AB, SK, AB+SK) and subjects. (c) RMSE under varying treadmill speeds (mean ± SD, 3 SK subjects).">
+    <Image source={results} altText="vision model scheme"/>
+  </Figure>
+  <Figure slot="right" caption="Exemplary plots of real-time kinematic estimations for each joint across experimental trials. The data corresponds to Subject 1 during a high-speed interval at 1.1 m/s. Solid lines represent the estimated joint angle values, while dotted lines indicate the ground-truth joint angle values.">
+    <Image source={results_joint} altText="vision model scheme"/>
+  </Figure>
+</TwoColumns>
+
+We investigated how much new data was required for transfer learning to the SK gait. We discovered that using just 6% of the SK dataset—equivalent to about one or two gait cycles—was sufficient for the estimation accuracy to converge. We then used this 6% subset to train the AB+SK model that was used in subsequent validation experiments.
+
+Our real-time validation experiments included both AB and SK subjects. The adapted AB+SK model improved estimation accuracy by about 10% compared to the AB-only model on SK subjects, and by about 20% compared to the SK-only model. This improvement remained consistent across different speed conditions, including low, high, and even transient speeds.
+
+
+## BibTeX citation
+```bibtex
+@misc{song2024personalizationwearablesensorbasedjoint,
+      title={Personalization of Wearable Sensor-Based Joint Kinematic Estimation Using Computer Vision for Hip Exoskeleton Applications}, 
+      author={Changseob Song and Bogdan Ivanyuk-Skulskyi and Adrian Krieger and Kaitao Luo and Inseung Kang},
+      year={2024},
+      eprint={2411.15366},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2411.15366}, 
+}
+```
+
+## Acknowledgements
+This work was supported in part by the Kwanjeong Educational Foundation.
